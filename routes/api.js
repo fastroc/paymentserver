@@ -50,7 +50,6 @@ router.post('/create-invoice', async (req, res) => {
     res.status(500).json({ error: 'Failed to create invoice', details: err.message });
   }
 });
-const { pool } = require('../services/paymentService');
 
 router.get('/health', async (req, res) => {
   try {
