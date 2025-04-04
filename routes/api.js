@@ -63,4 +63,30 @@ router.get('/health', async (req, res) => {
   }
 });
 
+router.get('/payment-status/:invoiceId', async (req, res) => {
+  try {
+    const { invoiceId } = req.params;
+    logger.info({ message: 'Checking payment status', invoiceId });
+    const payment = await checkPaymentStatus(invoiceId);
+    logger.info({ message: 'Payment status retrieved', invoiceId, status: payment.status });
+    res.json(payment);
+  } catch (err) {
+    logger.error({
+      message: 'Payment status check failed',
+      error: err.message,
+      stack: err.stack,
+      method: req.method,
+      path: req.path,
+      axiosDetails: err.isAxiosError ? {
+        url: err.config?.url,
+        method: err.config?.method,
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        data: err.response?.data
+      } : undefined
+    });
+    res.status(500).json({ error: 'Payment verification failed', details: err.message });
+  }
+});
+
 module.exports = router;
