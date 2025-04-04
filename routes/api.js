@@ -50,5 +50,17 @@ router.post('/create-invoice', async (req, res) => {
     res.status(500).json({ error: 'Failed to create invoice', details: err.message });
   }
 });
+const { pool } = require('../services/paymentService');
+
+router.get('/health', async (req, res) => {
+  try {
+    // Test database connection
+    await pool.query('SELECT 1');
+    res.status(200).json({ status: 'OK', message: 'Server and database are healthy' });
+  } catch (error) {
+    logger.error('Health check failed', { error: error.message });
+    res.status(500).json({ status: 'ERROR', message: 'Server or database issue' });
+  }
+});
 
 module.exports = router;
