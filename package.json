@@ -20,6 +20,32 @@
   },
   "devDependencies": {
     "jest": "^29.7.0",
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "glob": "^11.0.1"
+  },
+  "overrides": {
+    "glob": "$glob",
+    "@jest/core": {
+      "glob": "$glob",
+      "@jest/reporters": {
+        "glob": "$glob"
+      },
+      "@jest/transform": {
+        "babel-plugin-istanbul": {
+          "test-exclude": {
+            "glob": "$glob"
+          }
+        }
+      },
+      "jest-config": {
+        "glob": "$glob"
+      },
+      "jest-runtime": {
+        "glob": "$glob"
+      }
+    },
+    "nodemon": {
+      "glob": "$glob"
+    }
   }
 }
