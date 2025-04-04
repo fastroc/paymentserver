@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createInvoice } = require('../paymentService');
+const { createInvoice } = require('../services/paymentService');
 const winston = require('winston');
 
 const logger = winston.createLogger({
