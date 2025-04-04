@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { createInvoice, checkPaymentStatus, pool } = require('../services/paymentService');
+const { sendPdfEmail } = require('../services/emailService');
 const winston = require('winston');
+const multer = require('multer');
+
+// Configure multer to store files temporarily in /tmp
+const upload = multer({ dest: '/tmp' });
 
 const logger = winston.createLogger({
   level: 'info',
@@ -85,6 +90,40 @@ router.get('/payment-status/:invoiceId', async (req, res) => {
       } : undefined
     });
     res.status(500).json({ error: 'Payment verification failed', details: err.message });
+  }
+});
+
+router.post('/send-pdf', upload.fields([{ name: 'pdf', maxCount: 1 }]), async (req, res) => {
+  try {
+    const { email } = req.body;
+    logger.info({ message: 'Received send-pdf request', email });
+
+    if (!email) {
+      logger.warn({ message: 'Email is required for sending PDF', method: req.method, path: req.path });
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const pdfFile = req.files?.pdf?.[0];
+    if (!pdfFile) {
+      logger.warn({ message: 'PDF file is required for sending', method: req.method, path: req.path });
+      return res.status(400).json({ error: 'PDF file is required' });
+    }
+
+    const pdfPath = pdfFile.path;
+
+    const result = await sendPdfEmail(email, pdfPath);
+    logger.info({ message: 'PDF email sent successfully', email, result });
+
+    res.status(200).json({ message: 'PDF email sent successfully', result });
+  } catch (err) {
+    logger.error({
+      message: 'Failed to send PDF email',
+      error: err.message,
+      stack: err.stack,
+      method: req.method,
+      path: req.path
+    });
+    res.status(500).json({ error: 'Failed to send PDF email', details: err.message });
   }
 });
 
